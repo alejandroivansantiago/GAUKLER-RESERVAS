@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#00B24B"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="GAUKLER"/>
+<title>GAUKLER · Reservas</title>
+<link rel="manifest" href="./manifest.json"/>
+<link rel="apple-touch-icon" href="./icon-192.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<style>
+/* ── RESET & BASE ─────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --black:   #0A0A0A;
+  --s1:      #111111;
+  --s2:      #181818;
+  --s3:      #222222;
+  --border:  #2C2C2C;
+  --border2: #383838;
+  --green:   #00B24B;
+  --green-d: #009A40;
+  --green-l: #33C96A;
+  --green-bg:#00B24B18;
+  --green-xb:#00B24B0C;
+  --white:   #FFFFFF;
+  --off-w:   #F2F2F2;
+  --muted:   #888888;
+  --faint:   #555555;
+  --red:     #E53935;
+  --red-bg:  #E5393518;
+  --amber:   #F59E0B;
+  --amber-bg:#F59E0B18;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Inter',system-ui,sans-serif;color:var(--white)}
+#root{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:var(--black);position:relative;overflow:hidden}
+
+/* ── SCROLLBAR ──────────────────────────────────── */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── TOP BAR ────────────────────────────────────── */
+#topbar{
+  padding:calc(var(--safe-top) + 12px) 18px 12px;
+  background:var(--s1);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;z-index:10;
+}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:34px;height:34px;border-radius:8px;
+  background:var(--green);display:flex;align-items:center;
+  justify-content:center;font-size:18px;
+  box-shadow:0 0 16px #00B24B55;flex-shrink:0;
+}
+.logo-text{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:17px;letter-spacing:.06em;color:var(--white);line-height:1}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+.topbar-date{text-align:right;font-size:11px;color:var(--muted);line-height:1.5}
+
+/* ── BOTTOM NAV ─────────────────────────────────── */
+#nav{
+  padding:8px 0 calc(var(--safe-bot) + 8px);
+  background:var(--s1);
+  border-top:1px solid var(--border);
+  display:grid;grid-template-columns:repeat(3,1fr);
+  flex-shrink:0;z-index:10;
+}
+.nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 0;border:none;background:none;cursor:pointer;
+  color:var(--faint);transition:color .15s;
+}
+.nav-btn.active{color:var(--green)}
+.nav-btn .nav-icon{font-size:20px;line-height:1}
+.nav-btn .nav-label{font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;font-family:'Rajdhani',sans-serif}
+.nav-btn.active .nav-label{color:var(--green)}
+
+/* ── CONTENT AREA ───────────────────────────────── */
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative}
+.view{padding:16px;animation:fadeUp .25s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── SECTION HEADER ─────────────────────────────── */
+.section-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.section-title{
+  font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;
+  letter-spacing:.03em;color:var(--white);
+}
+.section-sub{font-size:13px;color:var(--muted);margin-top:1px}
+
+/* ── CARDS ──────────────────────────────────────── */
+.card{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;margin-bottom:10px;
+}
+.card-body{padding:14px 16px}
+
+/* ── STAT CARDS ─────────────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-card{
+  background:var(--s2);border:1px solid var(--border);border-radius:12px;
+  padding:16px 14px;position:relative;overflow:hidden;
+}
+.stat-card .stat-val{font-family:'Rajdhani',sans-serif;font-size:36px;font-weight:700;line-height:1;color:var(--white)}
+.stat-card .stat-lbl{font-size:11px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:4px;font-weight:500}
+.stat-card .stat-icon{position:absolute;top:10px;right:12px;font-size:24px;opacity:.15}
+.stat-card.accent{border-color:var(--green);background:var(--green-xb)}
+.stat-card.accent .stat-val{color:var(--green)}
+
+/* ── TIMELINE ITEM ──────────────────────────────── */
+.tl-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.tl-item:last-child{border-bottom:none}
+.tl-time{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;min-width:50px;color:var(--white);margin-top:1px}
+.tl-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--green);flex-shrink:0;margin-top:5px;
+  box-shadow:0 0 6px var(--green);
+}
+.tl-dot.past{background:var(--faint);box-shadow:none}
+.tl-name{font-size:15px;font-weight:500;color:var(--white);line-height:1.2}
+.tl-meta{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* ── RESERVA CARD ───────────────────────────────── */
+.res-card{
+  background:var(--s2);border:1px solid var(--border);border-radius:12px;
+  margin-bottom:10px;overflow:hidden;cursor:pointer;transition:border-color .15s;
+}
+.res-card:active{opacity:.85}
+.res-card-head{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;
+}
+.res-type-dot{width:4px;align-self:stretch;border-radius:2px;flex-shrink:0}
+.res-emoji{font-size:22px;flex-shrink:0}
+.res-info{flex:1;min-width:0}
+.res-name{font-size:15px;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.res-arrow{color:var(--faint);font-size:13px;transition:transform .2s;flex-shrink:0}
+.res-card.open .res-arrow{transform:rotate(180deg)}
+
+.res-detail{
+  padding:0 16px 14px;border-top:1px solid var(--border);
+  animation:fadeIn .2s ease both;
+}
+.res-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin:12px 0}
+.detail-item .di-label{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.detail-item .di-val{font-size:14px;color:var(--white);margin-top:2px;word-break:break-all}
+.detail-item.full{grid-column:1/-1}
+
+/* ── STATUS BADGE ───────────────────────────────── */
+.badge{
+  display:inline-block;padding:2px 10px;border-radius:20px;
+  font-size:10px;font-family:'Rajdhani',sans-serif;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;flex-shrink:0;
+}
+.badge-pendiente {background:#F59E0B18;color:#F59E0B;border:1px solid #F59E0B44}
+.badge-confirmada{background:#00B24B18;color:#00B24B;border:1px solid #00B24B44}
+.badge-completada{background:#88888818;color:#888888;border:1px solid #88888844}
+.badge-cancelada {background:#E5393518;color:#E53935;border:1px solid #E5393544}
+
+/* ── STATUS PILLS ───────────────────────────────── */
+.status-pills{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.s-pill{
+  padding:4px 12px;border-radius:14px;font-size:11px;border:1px solid var(--border);
+  color:var(--muted);cursor:pointer;background:none;font-family:'Rajdhani',sans-serif;
+  font-weight:600;letter-spacing:.05em;text-transform:uppercase;transition:all .15s;
+}
+.s-pill.active-pill{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+
+/* ── FAB ─────────────────────────────────────────── */
+.fab{
+  position:fixed;bottom:calc(var(--safe-bot) + 72px);right:20px;
+  width:54px;height:54px;border-radius:27px;
+  background:var(--green);border:none;cursor:pointer;
+  font-size:26px;color:var(--white);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px #00B24B55;transition:all .18s;z-index:20;
+}
+.fab:active{transform:scale(.92)}
+
+/* ── TYPE CHIP ───────────────────────────────────── */
+.type-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 12px;border-radius:6px;
+  font-size:12px;font-family:'Rajdhani',sans-serif;
+  font-weight:600;letter-spacing:.04em;border:1px solid;
+}
+
+/* ── EMPTY STATE ─────────────────────────────────── */
+.empty{text-align:center;padding:48px 24px}
+.empty-icon{font-size:44px;margin-bottom:14px;opacity:.5}
+.empty-title{font-size:17px;color:var(--muted);font-weight:500}
+.empty-sub{font-size:13px;color:var(--faint);margin-top:6px}
+
+/* ── NEXT BANNER ─────────────────────────────────── */
+.next-banner{
+  background:var(--green-bg);border:1px solid #00B24B44;
+  border-radius:12px;padding:14px 16px;margin-bottom:14px;
+  display:flex;align-items:center;gap:14px;
+}
+.next-icon{font-size:28px;flex-shrink:0}
+.next-label{font-size:10px;color:var(--green);letter-spacing:.1em;text-transform:uppercase;font-weight:600;font-family:'Rajdhani',sans-serif}
+.next-name{font-size:16px;font-weight:600;color:var(--white);margin-top:2px;line-height:1.2}
+.next-sub{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* ── MODAL ───────────────────────────────────────── */
+#modal-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:#000000CC;backdrop-filter:blur(4px);
+  display:none;align-items:flex-end;justify-content:center;
+  animation:fadeIn .2s ease both;
+}
+#modal-overlay.show{display:flex}
+.modal-sheet{
+  background:var(--s1);border-radius:20px 20px 0 0;
+  border:1px solid var(--border);border-bottom:none;
+  width:100%;max-width:480px;
+  max-height:92vh;overflow-y:auto;
+  animation:slideUp .25s cubic-bezier(.4,0,.2,1) both;
+  padding-bottom:calc(var(--safe-bot) + 8px);
+}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 4px}
+.modal-header{
+  padding:8px 18px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modal-title{font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;letter-spacing:.04em}
+.modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px}
+.modal-body{padding:16px 18px}
+
+/* ── FORM ELEMENTS ───────────────────────────────── */
+.form-group{margin-bottom:16px}
+.form-label{
+  display:block;font-size:11px;color:var(--muted);
+  letter-spacing:.09em;text-transform:uppercase;
+  font-weight:600;margin-bottom:6px;font-family:'Rajdhani',sans-serif;
+}
+.form-label span{color:var(--green)}
+.form-input,.form-select,.form-textarea{
+  width:100%;padding:11px 14px;
+  background:var(--s3);border:1px solid var(--border2);
+  border-radius:8px;color:var(--white);
+  font-family:'Inter',sans-serif;font-size:15px;
+  outline:none;transition:all .15s;
+  -webkit-appearance:none;appearance:none;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  border-color:var(--green);box-shadow:0 0 0 3px var(--green-bg);
+}
+.form-textarea{resize:vertical;min-height:72px}
+.form-error{font-size:12px;color:var(--red);margin-top:4px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ── PARTY SIZE ──────────────────────────────────── */
+.party-grid{display:flex;flex-wrap:wrap;gap:6px}
+.party-btn{
+  width:40px;height:36px;border-radius:6px;border:1px solid var(--border2);
+  background:var(--s3);color:var(--white);font-family:'Rajdhani',sans-serif;
+  font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.party-btn.sel{background:var(--green);border-color:var(--green);color:var(--white);box-shadow:0 0 10px #00B24B44}
+.party-more{padding:0 12px;height:36px;border-radius:6px;border:1px solid var(--border2);
+  background:var(--s3);color:var(--muted);font-size:11px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.04em}
+.party-more.sel{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+
+/* ── TYPE SELECTOR ───────────────────────────────── */
+.type-sel-grid{display:flex;flex-wrap:wrap;gap:8px}
+.type-sel-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:8px;border:1px solid var(--border2);
+  background:var(--s3);cursor:pointer;transition:all .15s;font-size:13px;
+  font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.03em;color:var(--muted);
+}
+.type-sel-btn.sel{border-color:var(--sel-color,var(--green));color:var(--sel-color,var(--green));
+  background:color-mix(in srgb,var(--sel-color,var(--green)) 12%,transparent);
+  box-shadow:0 0 8px color-mix(in srgb,var(--sel-color,var(--green)) 30%,transparent)}
+
+/* ── ACTION BUTTONS ──────────────────────────────── */
+.action-row{display:flex;gap:8px;margin-top:14px}
+.btn{
+  padding:11px 20px;border-radius:8px;border:none;
+  font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+  transition:all .18s;display:inline-flex;align-items:center;gap:6px;
+}
+.btn-primary{background:var(--green);color:var(--white)}
+.btn-primary:active{background:var(--green-d)}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border2)}
+.btn-outline:active{color:var(--white);border-color:var(--white)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid #E5393544}
+.btn-danger:active{background:var(--red)}
+.btn-full{width:100%;justify-content:center}
+.btn-sm{padding:7px 14px;font-size:13px}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+
+/* ── TIPO CARD ───────────────────────────────────── */
+.tipo-card{
+  background:var(--s2);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:14px;
+}
+.tipo-emoji{font-size:26px;flex-shrink:0;margin-top:2px}
+.tipo-info{flex:1;min-width:0}
+.tipo-name{font-size:16px;font-weight:600;font-family:'Rajdhani',sans-serif;letter-spacing:.03em;color:var(--white)}
+.tipo-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
+.tipo-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* ── COLOR PICKER ROW ────────────────────────────── */
+.color-swatches{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.color-swatch{
+  width:28px;height:28px;border-radius:50%;cursor:pointer;
+  border:3px solid transparent;transition:all .15s;flex-shrink:0;
+}
+.color-swatch.selected{border-color:var(--white);box-shadow:0 0 8px rgba(255,255,255,.4)}
+.color-input-wrap{position:relative;width:28px;height:28px}
+.color-native{opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+.color-circle{width:28px;height:28px;border-radius:50%;border:2px dashed var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:14px;pointer-events:none}
+
+/* ── EMOJI GRID ──────────────────────────────────── */
+.emoji-grid{display:flex;flex-wrap:wrap;gap:6px}
+.emoji-btn{
+  width:36px;height:36px;border-radius:6px;border:1px solid var(--border);
+  background:var(--s3);cursor:pointer;font-size:18px;transition:all .15s;
+}
+.emoji-btn.sel{border-color:var(--green);background:var(--green-bg)}
+
+/* ── SEARCH ──────────────────────────────────────── */
+.search-bar{
+  position:relative;margin-bottom:12px;
+}
+.search-bar input{
+  width:100%;padding:10px 14px 10px 38px;
+  background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  color:var(--white);font-family:'Inter',sans-serif;font-size:15px;outline:none;
+}
+.search-bar input:focus{border-color:var(--green)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px}
+
+/* ── FILTER ROW ──────────────────────────────────── */
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-chip{
+  flex-shrink:0;padding:5px 14px;border-radius:14px;border:1px solid var(--border);
+  background:none;color:var(--muted);font-size:12px;cursor:pointer;
+  font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;transition:all .15s;white-space:nowrap;
+}
+.filter-chip.act{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+
+/* ── INACTIVE OVERLAY ────────────────────────────── */
+.inactive-tag{
+  display:inline-block;padding:1px 7px;border-radius:3px;
+  font-size:10px;font-family:'Rajdhani',sans-serif;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;
+  background:var(--s3);color:var(--faint);border:1px solid var(--border);
+  margin-left:6px;vertical-align:middle;
+}
+
+/* ── CONFIRM DIALOG ──────────────────────────────── */
+.confirm-dialog{
+  padding:8px 18px 18px;
+}
+.confirm-msg{font-size:15px;color:var(--white);line-height:1.6;margin-bottom:20px}
+.confirm-msg strong{color:var(--green)}
+.confirm-row{display:flex;gap:8px}
+
+/* ── INFO ROW ────────────────────────────────────── */
+.info-box{
+  background:var(--green-xb);border:1px solid #00B24B22;border-radius:8px;
+  padding:12px 14px;margin-top:14px;font-size:13px;color:var(--muted);line-height:1.6;
+}
+.info-box strong{color:var(--white)}
+
+/* ── DIVIDER ─────────────────────────────────────── */
+.divider{height:1px;background:var(--border);margin:14px 0}
+
+/* ── TODAY STRIP ─────────────────────────────────── */
+.today-strip{
+  background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;
+}
+.today-lbl{font-size:11px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;font-family:'Rajdhani',sans-serif}
+.today-date{font-size:14px;font-weight:600;color:var(--white);margin-top:1px}
+</style>
+</head>
+<body>
+
+<div id="root">
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">🍺</div>
+      <div>
+        <div class="logo-text">GAUKLER</div>
+        <div class="logo-sub">Panel de Reservas</div>
+      </div>
+    </div>
+    <div class="topbar-date" id="topbar-date"></div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content"></div>
+
+  <!-- BOTTOM NAV -->
+  <div id="nav">
+    <button class="nav-btn active" onclick="navigate('dashboard')" id="nav-dashboard">
+      <div class="nav-icon">⚡</div>
+      <div class="nav-label">Inicio</div>
+    </button>
+    <button class="nav-btn" onclick="navigate('reservas')" id="nav-reservas">
+      <div class="nav-icon">📋</div>
+      <div class="nav-label">Reservas</div>
+    </button>
+    <button class="nav-btn" onclick="navigate('tipos')" id="nav-tipos">
+      <div class="nav-icon">🏷️</div>
+      <div class="nav-label">Tipos</div>
+    </button>
+  </div>
+</div>
+
+<!-- MODAL OVERLAY -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-sheet" id="modal-sheet"></div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// DATA LAYER
+// ─────────────────────────────────────────────────────────────
+const LS_R = 'gkl_reservas';
+const LS_T = 'gkl_tipos';
+
+function loadReservas() {
+  try { return JSON.parse(localStorage.getItem(LS_R)) || []; } catch { return []; }
+}
+function saveReservas(arr) { localStorage.setItem(LS_R, JSON.stringify(arr)); }
+
+function loadTipos() {
+  try {
+    const t = localStorage.getItem(LS_T);
+    if (t) return JSON.parse(t);
+  } catch {}
+  // Defaults on first run
+  const defaults = [
+    { id:'t1', name:'Standard',       emoji:'🍺', color:'#00B24B', desc:'Reserva estándar de mesa.',                      active:true },
+    { id:'t2', name:'Cumpleaños',     emoji:'🎂', color:'#9B59B6', desc:'Mesa decorada, trato especial al festejado.',    active:true },
+    { id:'t3', name:'Pizza Libre',    emoji:'🍕', color:'#E67E22', desc:'Combo pizza + birra ilimitada.',                 active:true },
+    { id:'t4', name:'Evento Privado', emoji:'🎉', color:'#2980B9', desc:'Sector o salón reservado en exclusiva.',         active:true },
+    { id:'t5', name:'Maridaje',       emoji:'🧀', color:'#27AE60', desc:'Cervezas especiales con tabla de quesos.',       active:true },
+  ];
+  localStorage.setItem(LS_T, JSON.stringify(defaults));
+  return defaults;
+}
+function saveTipos(arr) { localStorage.setItem(LS_T, JSON.stringify(arr)); }
+
+function uid() { return Math.random().toString(36).slice(2,10); }
+function gklCode() { return 'GKL-' + Math.random().toString(36).toUpperCase().slice(2,8); }
+
+// ─────────────────────────────────────────────────────────────
+// DATE / TIME HELPERS
+// ─────────────────────────────────────────────────────────────
+function todayISO() { return new Date().toISOString().split('T')[0]; }
+function fmtDate(iso) {
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-');
+  const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return `${d}/${ms[+m-1]}/${y}`;
+}
+function nowTime() { return new Date().toTimeString().slice(0,5); }
+
+const TIME_SLOTS = [
+  '18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30',
+  '22:00','22:30','23:00','23:30','00:00','00:30','01:00','01:30',
+  '02:00','02:30','03:00'
+];
+const STATUS = {
+  pendiente:  { label:'Pendiente',  cls:'badge-pendiente'  },
+  confirmada: { label:'Confirmada', cls:'badge-confirmada' },
+  completada: { label:'Completada', cls:'badge-completada' },
+  cancelada:  { label:'Cancelada',  cls:'badge-cancelada'  },
+};
+const EMOJIS = ['🍺','🎂','🍕','🎉','🧀','🍻','🥂','🎵','🌙','⚡','🔥','🎸','🍾','🎊','🥃','🫀','🪩','🌮'];
+const COLORS  = ['#00B24B','#9B59B6','#E67E22','#2980B9','#27AE60','#E74C3C','#1ABC9C','#F39C12','#8E44AD','#D35400','#2ECC71','#3498DB'];
+
+// ─────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────
+let currentView = 'dashboard';
+let openCards   = new Set();
+let resFilter   = { search:'', type:'', status:'' };
+let formData    = {};
+let modalMode   = null; // 'new-reserva' | 'edit-reserva' | 'new-tipo' | 'edit-tipo' | 'confirm-del-res' | 'confirm-del-tipo' | 'status'
+let editTarget  = null;
+let deleteTarget= null;
+let largeParty  = 9;
+
+// ─────────────────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────────────────
+function navigate(view) {
+  currentView = view;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + view)?.classList.add('active');
+  openCards.clear();
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// RENDER ROUTER
+// ─────────────────────────────────────────────────────────────
+function render() {
+  const el = document.getElementById('content');
+  if (currentView === 'dashboard') el.innerHTML = renderDashboard();
+  if (currentView === 'reservas')  el.innerHTML = renderReservas();
+  if (currentView === 'tipos')     el.innerHTML = renderTipos();
+  el.scrollTop = 0;
+}
+
+// ─────────────────────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const reservas = loadReservas();
+  const tipos    = loadTipos();
+  const today    = todayISO();
+  const now      = nowTime();
+  const todayR   = reservas.filter(r => r.date === today && r.status !== 'cancelada');
+  const pax      = todayR.reduce((s,r) => s + r.party, 0);
+  const conf     = todayR.filter(r => r.status === 'confirmada').length;
+  const pend     = todayR.filter(r => r.status === 'pendiente').length;
+  const sorted   = [...todayR].sort((a,b) => a.time.localeCompare(b.time));
+  const next     = sorted.find(r => r.time >= now);
+
+  const dateStr = new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+
+  let nextBanner = '';
+  if (next) {
+    const t = tipos.find(t => t.id === next.typeId) || {};
+    nextBanner = `
+      <div class="next-banner">
+        <div class="next-icon">⏰</div>
+        <div>
+          <div class="next-label">Próxima</div>
+          <div class="next-name">${esc(next.name)} — ${next.time} hs</div>
+          <div class="next-sub">${next.party} personas · ${esc(t.name||'')}</div>
+        </div>
+      </div>`;
+  }
+
+  let timeline = '';
+  if (sorted.length === 0) {
+    timeline = `<div class="empty" style="padding:28px 0"><div class="empty-icon">🍺</div><div class="empty-title">Sin reservas para hoy</div><div class="empty-sub">Tocá + para agregar</div></div>`;
+  } else {
+    timeline = sorted.map(r => {
+      const t   = tipos.find(t => t.id === r.typeId) || {};
+      const past= r.time < now && r.status === 'completada';
+      return `<div class="tl-item">
+        <div class="tl-time" style="color:${past?'var(--faint)':'var(--white)'}">${r.time}</div>
+        <div class="tl-dot ${past?'past':''}" style="background:${past?'':'var(--green)'};${past?'':'box-shadow:0 0 6px '+t.color}"></div>
+        <div style="flex:1;min-width:0">
+          <div class="tl-name">${esc(r.name)}</div>
+          <div class="tl-meta">${r.party} pers. · ${t.emoji||''} ${esc(t.name||'')} · <span class="badge ${STATUS[r.status].cls}">${STATUS[r.status].label}</span></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  return `<div class="view">
+    <div class="section-hd">
+      <div>
+        <div class="section-title">Dashboard</div>
+        <div class="section-sub" style="text-transform:capitalize">${dateStr}</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card accent">
+        <div class="stat-val">${todayR.length}</div>
+        <div class="stat-lbl">Reservas hoy</div>
+        <div class="stat-icon">📋</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${pax}</div>
+        <div class="stat-lbl">Pax esperados</div>
+        <div class="stat-icon">👥</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:#00B24B">${conf}</div>
+        <div class="stat-lbl">Confirmadas</div>
+        <div class="stat-icon">✅</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:#F59E0B">${pend}</div>
+        <div class="stat-lbl">Pendientes</div>
+        <div class="stat-icon">⏳</div>
+      </div>
+    </div>
+
+    ${nextBanner}
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)">Timeline de hoy</div>
+    </div>
+    <div class="card"><div class="card-body" style="padding:4px 16px">${timeline}</div></div>
+  </div>
+  <button class="fab" onclick="openNewReserva()">+</button>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// RESERVAS LIST
+// ─────────────────────────────────────────────────────────────
+function renderReservas() {
+  const reservas = loadReservas();
+  const tipos    = loadTipos();
+  const { search, type, status } = resFilter;
+
+  let filtered = [...reservas];
+  if (search)  filtered = filtered.filter(r => r.name.toLowerCase().includes(search.toLowerCase()) || r.phone.includes(search) || r.code.includes(search.toUpperCase()));
+  if (type)    filtered = filtered.filter(r => r.typeId === type);
+  if (status)  filtered = filtered.filter(r => r.status === status);
+  filtered.sort((a,b) => a.date===b.date ? a.time.localeCompare(b.time) : b.date.localeCompare(a.date));
+
+  const typeChips = tipos.map(t => `
+    <button class="filter-chip ${resFilter.type===t.id?'act':''}" onclick="setTypeFilter('${t.id}')">
+      ${t.emoji} ${esc(t.name)}
+    </button>`).join('');
+
+  const statusChips = Object.entries(STATUS).map(([k,v]) => `
+    <button class="filter-chip ${resFilter.status===k?'act':''}" onclick="setStatusFilter('${k}')">
+      ${v.label}
+    </button>`).join('');
+
+  let cards = '';
+  if (filtered.length === 0) {
+    cards = `<div class="empty"><div class="empty-icon">📋</div>
+      <div class="empty-title">Sin resultados</div>
+      <div class="empty-sub">Probá cambiando los filtros</div></div>`;
+  } else {
+    cards = filtered.map(r => {
+      const t  = tipos.find(t => t.id === r.typeId) || {};
+      const st = STATUS[r.status];
+      const open = openCards.has(r.id);
+      let detail = '';
+      if (open) {
+        detail = `<div class="res-detail">
+          <div class="res-detail-grid">
+            <div class="detail-item"><div class="di-label">📞 Teléfono</div><div class="di-val">${esc(r.phone)}</div></div>
+            ${r.email?`<div class="detail-item"><div class="di-label">✉️ Email</div><div class="di-val">${esc(r.email)}</div></div>`:''}
+            <div class="detail-item"><div class="di-label">🎟 Código</div><div class="di-val" style="color:var(--green);font-family:'Rajdhani',sans-serif;font-weight:700">${r.code}</div></div>
+            <div class="detail-item"><div class="di-label">📅 Fecha</div><div class="di-val">${fmtDate(r.date)}</div></div>
+            <div class="detail-item"><div class="di-label">⏰ Hora</div><div class="di-val">${r.time} hs</div></div>
+            <div class="detail-item"><div class="di-label">👥 Personas</div><div class="di-val">${r.party}</div></div>
+            ${r.notes?`<div class="detail-item full"><div class="di-label">📝 Notas</div><div class="di-val">${esc(r.notes)}</div></div>`:''}
+          </div>
+          <div class="status-pills">
+            ${Object.entries(STATUS).map(([k,v])=>`<button class="s-pill ${r.status===k?'active-pill':''}" onclick="changeStatus('${r.id}','${k}')">${v.label}</button>`).join('')}
+          </div>
+          <div class="action-row">
+            <button class="btn btn-outline btn-sm" onclick="openEditReserva('${r.id}')">✎ Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDelRes('${r.id}')">✕ Eliminar</button>
+          </div>
+        </div>`;
+      }
+      return `<div class="res-card ${open?'open':''}" id="rcard-${r.id}">
+        <div class="res-card-head" onclick="toggleCard('${r.id}')">
+          <div class="res-type-dot" style="background:${t.color||'var(--green)'}"></div>
+          <div class="res-emoji">${t.emoji||'🍺'}</div>
+          <div class="res-info">
+            <div class="res-name">${esc(r.name)}</div>
+            <div class="res-meta">📅 ${fmtDate(r.date)} · ⏰ ${r.time} hs · 👥 ${r.party} pers.</div>
+          </div>
+          <span class="badge ${st.cls}">${st.label}</span>
+          <div class="res-arrow">▾</div>
+        </div>
+        ${detail}
+      </div>`;
+    }).join('');
+  }
+
+  return `<div class="view">
+    <div class="section-hd">
+      <div>
+        <div class="section-title">Reservas <span style="font-size:15px;color:var(--muted);font-weight:400">(${filtered.length})</span></div>
+      </div>
+    </div>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input value="${esc(search)}" oninput="setSearch(this.value)" placeholder="Nombre, teléfono o código…" type="search"/>
+    </div>
+    <div class="filter-row">
+      <button class="filter-chip ${!resFilter.type&&!resFilter.status?'act':''}" onclick="clearFilters()">Todos</button>
+      ${typeChips}
+      ${statusChips}
+    </div>
+    ${cards}
+  </div>
+  <button class="fab" onclick="openNewReserva()">+</button>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// TIPOS LIST
+// ─────────────────────────────────────────────────────────────
+function renderTipos() {
+  const tipos = loadTipos();
+  const cards = tipos.map(t => `
+    <div class="tipo-card" style="border-left:3px solid ${t.color};opacity:${t.active?1:.5}">
+      <div class="tipo-emoji">${t.emoji}</div>
+      <div class="tipo-info">
+        <div class="tipo-name">${esc(t.name)}${!t.active?'<span class="inactive-tag">Inactivo</span>':''}</div>
+        ${t.desc?`<div class="tipo-desc">${esc(t.desc)}</div>`:''}
+        <div style="margin-top:8px">
+          <span class="type-chip" style="color:${t.color};border-color:${t.color}44;background:${t.color}12">${t.emoji} ${esc(t.name)}</span>
+        </div>
+      </div>
+      <div class="tipo-actions">
+        <button class="btn btn-outline btn-sm" onclick="openEditTipo('${t.id}')">✎</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleTipo('${t.id}')" style="font-size:11px">${t.active?'OFF':'ON'}</button>
+        ${tipos.length>1?`<button class="btn btn-danger btn-sm" onclick="confirmDelTipo('${t.id}')">✕</button>`:''}
+      </div>
+    </div>`).join('');
+
+  return `<div class="view">
+    <div class="section-hd">
+      <div>
+        <div class="section-title">Tipos de Reserva</div>
+        <div class="section-sub">Categorizá tus reservas</div>
+      </div>
+      <button class="btn btn-primary" onclick="openNewTipo()">+ Nuevo</button>
+    </div>
+    ${cards}
+    <div class="info-box">
+      💡 Los tipos <strong>inactivos</strong> no aparecen al crear nuevas reservas, pero las reservas existentes no se ven afectadas.
+    </div>
+  </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// FILTER ACTIONS
+// ─────────────────────────────────────────────────────────────
+function setSearch(v)       { resFilter.search=v; render(); }
+function setTypeFilter(id)  { resFilter.type = resFilter.type===id?'':id; render(); }
+function setStatusFilter(s) { resFilter.status = resFilter.status===s?'':s; render(); }
+function clearFilters()     { resFilter={search:'',type:'',status:''}; render(); }
+function toggleCard(id)     { openCards.has(id)?openCards.delete(id):openCards.add(id); render(); }
+function changeStatus(id,st){ const arr=loadReservas(); const i=arr.findIndex(r=>r.id===id); if(i>=0){arr[i].status=st;saveReservas(arr);} render(); }
+
+// ─────────────────────────────────────────────────────────────
+// RESERVA FORM
+// ─────────────────────────────────────────────────────────────
+function openNewReserva() {
+  modalMode = 'new-reserva';
+  editTarget = null;
+  formData = { name:'', phone:'', email:'', date:todayISO(), time:'20:00', party:2, typeId:'', notes:'', status:'pendiente' };
+  renderModal();
+}
+function openEditReserva(id) {
+  const r = loadReservas().find(r=>r.id===id);
+  if (!r) return;
+  modalMode  = 'edit-reserva';
+  editTarget = id;
+  formData   = {...r};
+  renderModal();
+}
+
+function renderReservaForm() {
+  const tipos  = loadTipos().filter(t=>t.active);
+  const isEdit = modalMode === 'edit-reserva';
+  const fd     = formData;
+
+  const timeOpts = TIME_SLOTS.map(t=>`<option value="${t}" ${fd.time===t?'selected':''}>${t} hs</option>`).join('');
+
+  const partyBtns = [1,2,3,4,5,6,7,8].map(n=>`
+    <button class="party-btn ${fd.party===n?'sel':''}" onclick="setParty(${n})">${n}</button>`).join('');
+
+  const typeChips = tipos.map(t=>`
+    <button class="type-sel-btn ${fd.typeId===t.id?'sel':''}" style="--sel-color:${t.color}" onclick="setType('${t.id}')">
+      <span style="font-size:16px">${t.emoji}</span>${esc(t.name)}
+    </button>`).join('');
+
+  const statusRow = isEdit ? `
+    <div class="form-group">
+      <label class="form-label">Estado</label>
+      <select class="form-select" onchange="fd('status',this.value)">
+        ${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${fd.status===k?'selected':''}>${v.label}</option>`).join('')}
+      </select>
+    </div>` : '';
+
+  return `
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">${isEdit?'Editar Reserva':'Nueva Reserva'}</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre del cliente <span>*</span></label>
+        <input class="form-input" id="fi-name" value="${esc(fd.name)}" oninput="fd('name',this.value)" placeholder="Nombre y apellido" autocomplete="off"/>
+        <div class="form-error" id="fe-name"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Teléfono <span>*</span></label>
+          <input class="form-input" id="fi-phone" value="${esc(fd.phone)}" oninput="fd('phone',this.value)" placeholder="+54 223…" type="tel"/>
+          <div class="form-error" id="fe-phone"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" value="${esc(fd.email)}" oninput="fd('email',this.value)" placeholder="opcional" type="email"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Fecha <span>*</span></label>
+          <input class="form-input" id="fi-date" value="${fd.date}" oninput="fd('date',this.value)" type="date" min="${todayISO()}"/>
+          <div class="form-error" id="fe-date"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Horario <span>*</span></label>
+          <select class="form-select" onchange="fd('time',this.value)">${timeOpts}</select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Personas <span>*</span></label>
+        <div class="party-grid" id="party-grid">
+          ${partyBtns}
+          <button class="party-more ${fd.party>=9?'sel':''}" onclick="setPartyLarge()">${fd.party>=9?fd.party+' pers.':'+8'}</button>
+          ${fd.party>=9?`<button class="btn btn-outline btn-sm" style="height:36px;width:36px;padding:0;justify-content:center" onclick="setParty(Math.max(9,formData.party-1))">−</button>
+          <button class="btn btn-outline btn-sm" style="height:36px;width:36px;padding:0;justify-content:center" onclick="setParty(formData.party+1)">+</button>`:''}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tipo de reserva <span>*</span></label>
+        <div class="type-sel-grid" id="type-sel">${typeChips}</div>
+        <div class="form-error" id="fe-type"></div>
+      </div>
+
+      ${statusRow}
+
+      <div class="form-group">
+        <label class="form-label">Notas</label>
+        <textarea class="form-textarea" oninput="fd('notes',this.value)" placeholder="Alergias, ocasión especial, preferencia de mesa…">${esc(fd.notes)}</textarea>
+      </div>
+
+      <div class="divider"></div>
+      <div class="action-row">
+        <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="saveReserva()" id="btn-save">
+          ${isEdit?'✓ Guardar':'✓ Crear Reserva'}
+        </button>
+      </div>
+    </div>`;
+}
+
+function fd(key, val) { formData[key] = val; }
+
+function setParty(n) {
+  formData.party = n;
+  const grid = document.getElementById('party-grid');
+  if (!grid) return;
+  // Re-render party section only
+  grid.querySelectorAll('.party-btn').forEach((b,i) => {
+    b.classList.toggle('sel', i+1 === n);
+  });
+  const more = grid.querySelector('.party-more');
+  if (more) { more.classList.toggle('sel', n>=9); more.textContent = n>=9?n+' pers.':'+8'; }
+}
+function setPartyLarge() { formData.party = Math.max(9, formData.party>=9?formData.party:9); renderModal(); }
+
+function setType(id) {
+  formData.typeId = id;
+  document.querySelectorAll('.type-sel-btn').forEach(b => {
+    b.classList.toggle('sel', b.getAttribute('onclick').includes("'"+id+"'"));
+  });
+}
+
+function saveReserva() {
+  let ok = true;
+  const set = (id, msg) => { const el=document.getElementById(id); if(el) el.textContent=msg; };
+  set('fe-name',''); set('fe-phone',''); set('fe-date',''); set('fe-type','');
+  if (!formData.name.trim())  { set('fe-name','Requerido');  ok=false; }
+  if (!formData.phone.trim()) { set('fe-phone','Requerido'); ok=false; }
+  if (!formData.date)         { set('fe-date','Requerido');  ok=false; }
+  if (!formData.typeId)       { set('fe-type','Seleccioná un tipo'); ok=false; }
+  if (!ok) return;
+
+  const btn = document.getElementById('btn-save');
+  if (btn) btn.innerHTML = '<span class="spinner"></span> Guardando…';
+
+  setTimeout(() => {
+    const arr = loadReservas();
+    if (modalMode === 'edit-reserva') {
+      const i = arr.findIndex(r => r.id === editTarget);
+      if (i >= 0) arr[i] = { ...arr[i], ...formData };
+    } else {
+      arr.unshift({ ...formData, id:uid(), code:gklCode(), createdAt:Date.now() });
+    }
+    saveReservas(arr);
+    closeModal();
+    render();
+  }, 500);
+}
+
+// ─────────────────────────────────────────────────────────────
+// TIPO FORM
+// ─────────────────────────────────────────────────────────────
+function openNewTipo() {
+  modalMode  = 'new-tipo';
+  editTarget = null;
+  formData   = { name:'', emoji:'🍺', color:'#00B24B', desc:'', active:true };
+  renderModal();
+}
+function openEditTipo(id) {
+  const t = loadTipos().find(t=>t.id===id);
+  if (!t) return;
+  modalMode  = 'edit-tipo';
+  editTarget = id;
+  formData   = {...t};
+  renderModal();
+}
+
+function renderTipoForm() {
+  const isEdit = modalMode === 'edit-tipo';
+  const fd     = formData;
+  const swatches = COLORS.map(c=>`
+    <div class="color-swatch ${fd.color===c?'selected':''}" style="background:${c}" onclick="setColor('${c}')"></div>`).join('');
+  const emojiGrid = EMOJIS.map(e=>`
+    <button class="emoji-btn ${fd.emoji===e?'sel':''}" onclick="setEmoji('${e}')">${e}</button>`).join('');
+
+  return `
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">${isEdit?'Editar Tipo':'Nuevo Tipo de Reserva'}</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre <span style="color:var(--green)">*</span></label>
+        <input class="form-input" id="fi-tipo-name" value="${esc(fd.name)}" oninput="fd('name',this.value)" placeholder="Ej: Pizza Libre" autocomplete="off"/>
+        <div class="form-error" id="fe-tipo-name"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ícono</label>
+        <div class="emoji-grid">${emojiGrid}</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Color</label>
+        <div class="color-swatches">
+          ${swatches}
+          <div class="color-input-wrap">
+            <div class="color-circle" style="background:${fd.color}"></div>
+            <input class="color-native" type="color" value="${fd.color}" oninput="setColor(this.value)"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div style="background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-family:'Rajdhani',sans-serif;margin-bottom:8px">Vista previa</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="prev-emoji" style="font-size:22px">${fd.emoji}</span>
+          <span id="prev-tag" class="type-chip" style="color:${fd.color};border-color:${fd.color}44;background:${fd.color}12">${fd.emoji} ${esc(fd.name)||'Sin nombre'}</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Descripción interna</label>
+        <textarea class="form-textarea" oninput="fd('desc',this.value)" placeholder="Descripción breve para el equipo…" rows="2">${esc(fd.desc)}</textarea>
+      </div>
+
+      <div class="divider"></div>
+      <div class="action-row">
+        <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="saveTipoForm()">
+          ${isEdit?'✓ Guardar':'✓ Crear Tipo'}
+        </button>
+      </div>
+    </div>`;
+}
+
+function setEmoji(e) {
+  formData.emoji = e;
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.toggle('sel', b.textContent===e));
+  updatePreview();
+}
+function setColor(c) {
+  formData.color = c;
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('selected', s.style.background===c||s.getAttribute('onclick')?.includes("'"+c+"'")));
+  const circle = document.querySelector('.color-circle');
+  if (circle) circle.style.background = c;
+  updatePreview();
+}
+function updatePreview() {
+  const c=formData.color, e=formData.emoji, n=formData.name||'Sin nombre';
+  const tag=document.getElementById('prev-tag');
+  const em=document.getElementById('prev-emoji');
+  if(tag){ tag.style.color=c;tag.style.borderColor=c+'44';tag.style.background=c+'12';tag.textContent=e+' '+n; }
+  if(em)  em.textContent=e;
+}
+
+function saveTipoForm() {
+  const el = document.getElementById('fe-tipo-name');
+  if (el) el.textContent='';
+  if (!formData.name.trim()) { if(el) el.textContent='Requerido'; return; }
+  const arr = loadTipos();
+  if (modalMode === 'edit-tipo') {
+    const i = arr.findIndex(t=>t.id===editTarget);
+    if (i>=0) arr[i] = { ...arr[i], ...formData };
+  } else {
+    arr.push({ ...formData, id:uid() });
+  }
+  saveTipos(arr);
+  closeModal();
+  render();
+}
+
+function toggleTipo(id) {
+  const arr = loadTipos();
+  const i = arr.findIndex(t=>t.id===id);
+  if (i>=0) arr[i].active = !arr[i].active;
+  saveTipos(arr);
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// CONFIRM DIALOGS
+// ─────────────────────────────────────────────────────────────
+function confirmDelRes(id) {
+  const r = loadReservas().find(r=>r.id===id);
+  modalMode   = 'confirm-del-res';
+  deleteTarget= id;
+  const html = `
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Eliminar Reserva</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-dialog">
+        <div class="confirm-msg">¿Eliminar la reserva de <strong>${esc(r?.name||'')}</strong>? Esta acción no se puede deshacer.</div>
+        <div class="confirm-row">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-danger" style="flex:1;justify-content:center" onclick="doDelRes()">✕ Eliminar</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('modal-sheet').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function doDelRes() {
+  const arr = loadReservas().filter(r=>r.id!==deleteTarget);
+  saveReservas(arr);
+  closeModal();
+  render();
+}
+
+function confirmDelTipo(id) {
+  const t = loadTipos().find(t=>t.id===id);
+  modalMode   = 'confirm-del-tipo';
+  deleteTarget= id;
+  const html = `
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Eliminar Tipo</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-dialog">
+        <div class="confirm-msg">¿Eliminar el tipo <strong>${esc(t?.name||'')}</strong>? Las reservas existentes no se verán afectadas.</div>
+        <div class="confirm-row">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-danger" style="flex:1;justify-content:center" onclick="doDelTipo()">✕ Eliminar</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('modal-sheet').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function doDelTipo() {
+  const arr = loadTipos().filter(t=>t.id!==deleteTarget);
+  saveTipos(arr);
+  closeModal();
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// MODAL ENGINE
+// ─────────────────────────────────────────────────────────────
+function renderModal() {
+  let html = '';
+  if (modalMode==='new-reserva'||modalMode==='edit-reserva') html = renderReservaForm();
+  if (modalMode==='new-tipo'   ||modalMode==='edit-tipo')    html = renderTipoForm();
+  document.getElementById('modal-sheet').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('show');
+  modalMode = null; formData = {}; editTarget = null;
+}
+
+// ─────────────────────────────────────────────────────────────
+// UTILITIES
+// ─────────────────────────────────────────────────────────────
+function esc(str='') {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Date in top bar
+  const d = new Date();
+  document.getElementById('topbar-date').innerHTML =
+    `<div>${d.toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'})}</div>
+     <div style="font-size:10px">San Luis 2944</div>`;
+
+  // Register SW
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+
+  render();
+});
+
+// Prevent pull-to-refresh
+document.addEventListener('touchstart', ()=>{}, {passive:true});
+</script>
+</body>
+</html>

@@ -240,7 +240,7 @@ firebase.initializeApp({
   appId:"1:40036796342:web:782fefdb800d68094ee317"
 });
 const db = firebase.firestore();
-db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+db.enablePersistence().catch(()=>{});
 
 // ── CONSTANTS ─────────────────────────────────────
 const DEFAULT_TIPOS = [
@@ -281,22 +281,70 @@ function sync(state){
 
 // ── FIRESTORE LISTENERS ───────────────────────────
 function startListeners(){
-  db.collection('tipos').orderBy('createdAt').onSnapshot(snap=>{
+  // Sin orderBy para evitar requerir índices compuestos
+  // El ordenamiento se hace del lado del cliente
+  db.collection('tipos').onSnapshot(snap=>{
     tipos=snap.docs.map(d=>({id:d.id,...d.data()}));
-    if(!loaded.t&&tipos.length===0)seedTipos();
-    loaded.t=true; checkReady(); if(currentView==='tipos')render(); sync('ok');
-  },()=>sync('off'));
+    // Ordenar por nombre si no tienen createdAt
+    tipos.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    if(!loaded.t&&tipos.length===0) seedTipos();
+    loaded.t=true;
+    sync('ok');
+    checkReady();
+    if(currentView==='tipos') render();
+  }, err=>{
+    console.error('Error tipos:', err.code, err.message);
+    loaded.t=true; // Desbloquear aunque haya error
+    sync('off');
+    showFirebaseError(err.code);
+    checkReady();
+  });
 
-  db.collection('reservas').orderBy('createdAt','desc').onSnapshot(snap=>{
+  db.collection('reservas').onSnapshot(snap=>{
     reservas=snap.docs.map(d=>({id:d.id,...d.data()}));
-    loaded.r=true; checkReady(); if(currentView!=='tipos')render(); sync('ok');
-  },()=>sync('off'));
+    // Ordenar client-side: más recientes primero
+    reservas.sort((a,b)=>{
+      if(a.date!==b.date) return (b.date||'').localeCompare(a.date||'');
+      return (a.time||'').localeCompare(b.time||'');
+    });
+    loaded.r=true;
+    sync('ok');
+    checkReady();
+    if(currentView!=='tipos') render();
+  }, err=>{
+    console.error('Error reservas:', err.code, err.message);
+    loaded.r=true; // Desbloquear aunque haya error
+    sync('off');
+    showFirebaseError(err.code);
+    checkReady();
+  });
 }
-function checkReady(){if(loaded.r&&loaded.t&&currentView)render();}
+
+function showFirebaseError(code){
+  const el=document.getElementById('content');
+  if(!el) return;
+  let msg='Error de conexión con Firebase.';
+  if(code==='permission-denied') msg='⛔ Acceso denegado. Las reglas de Firestore no permiten lectura. Actualizalas en la consola de Firebase.';
+  else if(code==='unavailable')  msg='📡 Sin conexión. Verificá el internet e intentá de nuevo.';
+  // Solo mostrar si no cargó nada aún
+  if(!loaded.r||!loaded.t){
+    el.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px;text-align:center;gap:16px">
+      <div style="font-size:40px">⚠️</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:16px;color:var(--red);line-height:1.5">${msg}</div>
+      <div style="font-size:12px;color:var(--muted)">Código: ${code}</div>
+      <button class="btn btn-p" onclick="location.reload()">🔄 Reintentar</button>
+    </div>`;
+  }
+}
+
+function checkReady(){if(loaded.r&&loaded.t) render();}
+
 async function seedTipos(){
-  const b=db.batch();
-  DEFAULT_TIPOS.forEach(t=>b.set(db.collection('tipos').doc(t.id),{...t,createdAt:firebase.firestore.FieldValue.serverTimestamp()}));
-  await b.commit();
+  try{
+    const b=db.batch();
+    DEFAULT_TIPOS.forEach(t=>b.set(db.collection('tipos').doc(t.id),{...t,createdAt:firebase.firestore.FieldValue.serverTimestamp()}));
+    await b.commit();
+  }catch(e){ console.error('seedTipos error:',e); }
 }
 
 // ── DB OPS ────────────────────────────────────────

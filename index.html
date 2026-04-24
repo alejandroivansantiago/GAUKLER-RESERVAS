@@ -176,6 +176,26 @@ html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Inter
 .empty-t{font-size:17px;color:var(--muted);font-weight:500}
 .empty-s{font-size:13px;color:var(--faint);margin-top:6px}
 .chip{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:6px;font-size:12px;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.04em;border:1px solid}
+
+/* ── PIN SCREEN ──────────────────────────────────── */
+#pin-screen{position:fixed;inset:0;z-index:9999;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;animation:fadeIn .3s ease both}
+#pin-screen.hidden{display:none}
+.pin-logo{width:64px;height:64px;border-radius:16px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 0 30px #00B24B55;margin-bottom:20px}
+.pin-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:26px;letter-spacing:.06em;color:var(--white);text-align:center;line-height:1}
+.pin-sub{font-size:13px;color:var(--muted);text-align:center;margin-top:6px;margin-bottom:36px}
+.pin-dots{display:flex;gap:14px;margin-bottom:36px}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border2);background:transparent;transition:all .15s}
+.pin-dot.filled{background:var(--green);border-color:var(--green);box-shadow:0 0 8px var(--green)}
+.pin-dot.error{background:var(--red);border-color:var(--red);animation:shake .3s ease}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px}
+.pin-key{height:68px;border-radius:14px;border:1px solid var(--border2);background:var(--s2);color:var(--white);font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;user-select:none}
+.pin-key:active{background:var(--green);border-color:var(--green);transform:scale(.94)}
+.pin-key .pk-letters{font-size:8px;letter-spacing:.1em;color:var(--muted);font-weight:500}
+.pin-key.pin-del{font-size:20px;background:transparent;border-color:var(--border)}
+.pin-key.pin-zero{grid-column:2}
+.pin-error-msg{font-size:13px;color:var(--red);text-align:center;margin-top:16px;min-height:18px;font-family:'Rajdhani',sans-serif;letter-spacing:.05em}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
 </style>
 </head>
 <body>
@@ -556,7 +576,82 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('topbar-date').textContent=d.toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'});
   if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
   startListeners();
+  initPinScreen();
 });
+
+// ── PIN LOGIC ─────────────────────────────────────
+const CORRECT_PIN = '1234'; // ← CAMBIÁ ESTE PIN
+const SESSION_KEY = 'gkl_auth';
+let pinBuffer = '';
+
+function pinKey(d) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += d;
+  updateDots();
+  if (pinBuffer.length === 4) setTimeout(checkPin, 150);
+}
+
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updateDots();
+  document.getElementById('pin-err').textContent = '';
+}
+
+function updateDots() {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('pd' + i);
+    d.classList.toggle('filled', i < pinBuffer.length);
+    d.classList.remove('error');
+  }
+}
+
+function checkPin() {
+  if (pinBuffer === CORRECT_PIN) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    document.getElementById('pin-screen').classList.add('hidden');
+  } else {
+    // Wrong PIN
+    for (let i = 0; i < 4; i++) document.getElementById('pd' + i).classList.add('error');
+    document.getElementById('pin-err').textContent = 'PIN incorrecto. Intentá de nuevo.';
+    setTimeout(() => { pinBuffer = ''; updateDots(); }, 800);
+  }
+}
+
+function initPinScreen() {
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    document.getElementById('pin-screen').classList.add('hidden');
+  }
+  // else stays visible
+}
+
 </script>
+
+<!-- ── PIN SCREEN ── -->
+<div id="pin-screen">
+  <div class="pin-logo">🍺</div>
+  <div class="pin-title">GAUKLER</div>
+  <div class="pin-sub">Ingresá tu PIN para acceder</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-key" onclick="pinKey('1')"><span>1</span></button>
+    <button class="pin-key" onclick="pinKey('2')"><span>2</span><span class="pk-letters">ABC</span></button>
+    <button class="pin-key" onclick="pinKey('3')"><span>3</span><span class="pk-letters">DEF</span></button>
+    <button class="pin-key" onclick="pinKey('4')"><span>4</span><span class="pk-letters">GHI</span></button>
+    <button class="pin-key" onclick="pinKey('5')"><span>5</span><span class="pk-letters">JKL</span></button>
+    <button class="pin-key" onclick="pinKey('6')"><span>6</span><span class="pk-letters">MNO</span></button>
+    <button class="pin-key" onclick="pinKey('7')"><span>7</span><span class="pk-letters">PQRS</span></button>
+    <button class="pin-key" onclick="pinKey('8')"><span>8</span><span class="pk-letters">TUV</span></button>
+    <button class="pin-key" onclick="pinKey('9')"><span>9</span><span class="pk-letters">WXYZ</span></button>
+    <button class="pin-key pin-del" onclick="pinDel()">⌫</button>
+    <button class="pin-key pin-zero" onclick="pinKey('0')"><span>0</span></button>
+  </div>
+  <div class="pin-error-msg" id="pin-err"></div>
+</div>
+
 </body>
 </html>
